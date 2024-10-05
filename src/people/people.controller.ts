@@ -18,30 +18,31 @@ export class PeopleController {
   constructor(private readonly peopleService: PeopleService) {}
 
   @Post()
-  async createPerson(@Body() createPersonDto: CreatePersonDto) {
+  async createPerson(
+    @Body() createPersonDto: CreatePersonDto,
+  ): Promise<Person> {
     return await this.peopleService.createPerson(createPersonDto);
   }
 
   @Get()
-  async findPeople(@Param() params: FindPeopleParams) {
+  async findPeople(@Param() params: FindPeopleParams): Promise<Person[]> {
     return await this.peopleService.findPeople(params);
+  }
+  @Get(':id')
+  async findPersonBy(@Param('id') id: string): Promise<Person> {
+    return await this.peopleService.findPerson({ id });
   }
 
   @Get('/me')
-  async aboutMe(@GetInfoAboutMe() person: Person) {
+  async aboutMe(@GetInfoAboutMe() person: Person): Promise<Person> {
     return person;
-  }
-
-  @Get(':id')
-  async findPersonBy(@Param('id') id: string) {
-    return await this.peopleService.findPerson({ id });
   }
 
   @Patch(':id')
   async updatePersonBy(
     @Param('id') id: string,
     @Body() updatePersonDto: UpdatePersonDto,
-  ) {
+  ): Promise<Person> {
     return await this.peopleService.updatePerson({
       where: { id },
       data: updatePersonDto,
@@ -49,7 +50,7 @@ export class PeopleController {
   }
 
   @Delete(':id')
-  async deletePersonBy(@Param('id') id: string) {
+  async deletePersonBy(@Param('id') id: string): Promise<Person> {
     return await this.peopleService.deletePerson({ id });
   }
 }
