@@ -13,14 +13,13 @@ export class AuthenticationService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async login(data: ILoginData): Promise<Person> {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
     const person = await this.prismaService.person.findUniqueOrThrow({
       where: {
         login: data.login,
       },
     });
 
-    if (await bcrypt.compare(hashedPassword, person.password)) {
+    if (await bcrypt.compare(data.password, person.password)) {
       return person;
     } else {
       throw new BadRequestException("Invalid password");
