@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreatePersonDto } from './create-person.dto';
+import { Prisma } from '@prisma/client';
 
-export class UpdatePersonDto extends PartialType(CreatePersonDto) {}
+export class UpdatePersonDto
+  implements Omit<Prisma.PersonUpdateInput, 'id' | 'login'> {}
