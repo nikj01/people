@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from "@prisma/client";
 
 export class CreatePersonDto implements Partial<Prisma.PersonCreateInput> {
   login: string;

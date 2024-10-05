@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from "@prisma/client";
 
-export class UpdatePersonDto
-  implements Omit<Prisma.PersonUpdateInput, 'id' | 'login'> {}
+export class UpdatePersonDto implements Omit<Prisma.PersonUpdateInput, "id" | "login"> {}
