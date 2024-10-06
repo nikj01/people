@@ -51,7 +51,7 @@ describe("People (e2e)", () => {
       .expect(200)
       .expect(({ body }) => {
         expect(body).toBeInstanceOf(Array);
-        expect(body.length).toEqual(1);
+        expect(body.length).toEqual(2);
         console.log(body);
       });
   });
