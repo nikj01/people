@@ -29,14 +29,16 @@ export class PeopleController {
   }
 
   @Patch(":id")
-  async updatePersonBy(
-    @Param("id") id: string,
-    @Body() updatePersonDto: UpdatePersonDto,
-  ): Promise<Person> {
+  async updatePersonBy(@Param("id") id: string, @Body() updatePersonDto: UpdatePersonDto): Promise<Person> {
     return await this.peopleService.updatePerson({
       where: { id },
       data: updatePersonDto,
     });
+  }
+
+  @Delete("/soft/:id")
+  async softDeletePersonBy(@Param("id") id: string): Promise<Person> {
+    return await this.peopleService.softDeletePerson({ id });
   }
 
   @Delete(":id")

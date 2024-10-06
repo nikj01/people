@@ -21,7 +21,7 @@ export class PeopleService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async createPerson(data: Prisma.PersonCreateInput): Promise<Person> {
-    const hashedPassword = (data.password = await bcrypt.hash(data.password, SALT));
+    const hashedPassword = await bcrypt.hash(data.password, SALT);
 
     return this.prismaService.person.create({
       data: { ...data, password: hashedPassword },
@@ -43,6 +43,10 @@ export class PeopleService {
       where: updatedData.where,
       data: { ...updatedData.data, password: hashedPassword },
     });
+  }
+
+  async softDeletePerson(where: Prisma.PersonWhereUniqueInput): Promise<Person> {
+    return this.prismaService.person.update({ where, data: { isDeleted: true, deletedAt: new Date() } });
   }
 
   async deletePerson(where: Prisma.PersonWhereUniqueInput): Promise<Person> {
