@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from "@nestjs/commo
 import { IFindPeopleParams, PeopleService } from "./people.service";
 import { CreatePersonDto } from "./dto/create-person.dto";
 import { UpdatePersonDto } from "./dto/update-person.dto";
-import { GetInfoAboutMe } from "./decorators/get-user.decorator";
+import { GetInfoAboutMe } from "../decorators/get-user.decorator";
 import { Person } from "@prisma/client";
 import { GetSlimPersonDto } from "./dto/get-slim-person.dto";
 import { plainToInstance } from "class-transformer";

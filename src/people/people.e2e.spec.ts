@@ -46,7 +46,13 @@ describe("People (e2e)", () => {
     });
 
     it("should fail if person already exists", async () => {
-      return request(app.getHttpServer()).post("/people").send(newPerson).expect(400);
+      return request(app.getHttpServer())
+        .post("/people")
+        .send(newPerson)
+        .expect(400)
+        .expect(({ body }) => {
+          console.log(body);
+        });
     });
   });
 
