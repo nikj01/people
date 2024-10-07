@@ -4,10 +4,11 @@ import { Test } from "@nestjs/testing";
 import { Person } from "@prisma/client";
 import { BadRequestException } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
-import { SALT } from "../constants";
+import { ConfigService } from "@nestjs/config";
 
 describe("AuthenticationService", () => {
   let service: AuthenticationService;
+  let configService: ConfigService;
 
   const mockPrismaService = {
     person: {
@@ -27,6 +28,7 @@ describe("AuthenticationService", () => {
     }).compile();
 
     service = module.get<AuthenticationService>(AuthenticationService);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
   afterEach(() => {
@@ -42,6 +44,8 @@ describe("AuthenticationService", () => {
       login: "test",
       password: "password",
     };
+
+    const salt = configService.get<number>("SALT");
 
     const existingPerson: Person = {
       id: "1",
@@ -60,7 +64,7 @@ describe("AuthenticationService", () => {
 
     const setUpExistingPerson = async () => {
       mockPrismaService.person.findUniqueOrThrow.mockResolvedValue(existingPerson);
-      existingPerson.password = await bcrypt.hash(existingPerson.password, SALT);
+      existingPerson.password = await bcrypt.hash(existingPerson.password, salt);
     };
 
     it("should return a person", async () => {

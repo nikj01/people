@@ -4,6 +4,9 @@ import { CreatePersonDto } from "./dto/create-person.dto";
 import { UpdatePersonDto } from "./dto/update-person.dto";
 import { GetInfoAboutMe } from "./decorators/get-user.decorator";
 import { Person } from "@prisma/client";
+import { GetSlimPersonDto } from "./dto/get-slim-person.dto";
+import { plainToInstance } from "class-transformer";
+import { GetPersonDto } from "./dto/get-person.dto";
 
 @Controller("people")
 export class PeopleController {
@@ -15,12 +18,15 @@ export class PeopleController {
   }
 
   @Get()
-  async findPeople(@Param() params: IFindPeopleParams): Promise<Person[]> {
-    return await this.peopleService.findPeople(params);
+  async findPeople(@Param() params: IFindPeopleParams): Promise<GetSlimPersonDto[]> {
+    const people = await this.peopleService.findPeople(params);
+    return plainToInstance(GetSlimPersonDto, people);
   }
+
   @Get(":id")
-  async findPersonBy(@Param("id") id: string): Promise<Person> {
-    return await this.peopleService.findPerson({ id });
+  async findPersonBy(@Param("id") id: string): Promise<GetPersonDto> {
+    const person = await this.peopleService.findPerson({ id });
+    return plainToInstance(GetPersonDto, person);
   }
 
   @Get("/me")

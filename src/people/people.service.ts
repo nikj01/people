@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import { Person, Prisma } from "@prisma/client";
 import * as bcrypt from "bcrypt";
-import { SALT } from "../constants";
+import { ConfigService } from "@nestjs/config";
 
 export interface IFindPeopleParams {
   skip?: number;
@@ -18,10 +18,14 @@ export interface IUpdatePersonData {
 
 @Injectable()
 export class PeopleService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
+  private readonly salt = this.configService.get<number>("SALT");
 
   async createPerson(data: Prisma.PersonCreateInput): Promise<Person> {
-    const hashedPassword = await bcrypt.hash(data.password, SALT);
+    const hashedPassword = await bcrypt.hash(data.password, this.salt);
 
     return this.prismaService.person.create({
       data: { ...data, password: hashedPassword },
@@ -37,7 +41,7 @@ export class PeopleService {
   }
 
   async updatePerson(updatedData: IUpdatePersonData): Promise<Person> {
-    const hashedPassword = await bcrypt.hash(updatedData.data.password as string, SALT);
+    const hashedPassword = await bcrypt.hash(updatedData.data.password as string, this.salt);
 
     return this.prismaService.person.update({
       where: updatedData.where,

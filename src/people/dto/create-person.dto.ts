@@ -1,7 +1,9 @@
 import { Prisma } from "@prisma/client";
 import { IsEmail, IsNumber, IsString, Max, MaxLength, Min, MinLength } from "class-validator";
 
-export class CreatePersonDto implements Partial<Prisma.PersonCreateInput> {
+export class CreatePersonDto
+  implements Omit<Prisma.PersonCreateInput, "id" | "isDeleted" | "createdAt" | "updatedAt" | "deletedAt">
+{
   @IsString()
   @MinLength(5, { message: "Login is too short. Minial length is 5" })
   @MaxLength(256, { message: "Login is too long. Maximal length is 256" })
