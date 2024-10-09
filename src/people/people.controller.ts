@@ -19,14 +19,18 @@ export class PeopleController {
 
   @Get()
   async findPeople(@Param() params: IFindPeopleParams): Promise<GetSlimPersonDto[]> {
-    const people = await this.peopleService.findPeople(params);
-    return plainToInstance(GetSlimPersonDto, people);
+    return await this.peopleService
+      .findPeople(params)
+      .then(people =>
+        people.map(person => plainToInstance(GetSlimPersonDto, person, { excludeExtraneousValues: true })),
+      );
   }
 
   @Get(":id")
   async findPersonBy(@Param("id") id: string): Promise<GetPersonDto> {
-    const person = await this.peopleService.findPerson({ id });
-    return plainToInstance(GetPersonDto, person);
+    return await this.peopleService
+      .findPerson({ id })
+      .then(person => plainToInstance(GetPersonDto, person, { excludeExtraneousValues: true }));
   }
 
   @Get("/me")
