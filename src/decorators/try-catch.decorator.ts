@@ -1,4 +1,5 @@
-import { HttpException, Logger } from "@nestjs/common";
+import { BadRequestException, Logger } from "@nestjs/common";
+import { ValidationError } from "class-validator";
 
 export function TryCatchHandler(): MethodDecorator {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
@@ -8,8 +9,12 @@ export function TryCatchHandler(): MethodDecorator {
       try {
         return await originalMethod.apply(this, args);
       } catch (error) {
-        Logger.log(error);
-        throw new HttpException(`Something went wrong: ${error.message}`, 400);
+        if (error instanceof ValidationError) {
+          Logger.log(error);
+          throw new BadRequestException(`Something went wrong: ${error}`);
+        } else {
+          return error;
+        }
       }
     };
     return descriptor;
