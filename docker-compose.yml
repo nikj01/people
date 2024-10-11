@@ -1,0 +1,26 @@
+services:
+  postgres:
+    container_name: "people-postgres"
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: test_db
+      PGDATA: /data/postgres
+    volumes:
+      - ./db/data/postgres:/data/postgres
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    container_name: "people-pgadmin"
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - ./db/data/pgadmin:/var/lib/pgadmin
+    ports:
+      - "5430:80"
+    depends_on:
+      - postgres

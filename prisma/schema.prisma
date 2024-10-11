@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Person {
+  id        String  @id @default(cuid())
+  login     String  @db.VarChar(256) @unique
+  email     String  @db.VarChar(256) @unique
+  password  String  @db.VarChar(256)
+  age       Int
+  details   String  @db.VarChar(1000)
+  isDeleted Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
