@@ -11,7 +11,7 @@ export class CreatePersonDto
   login: string;
 
   @IsString()
-  @IsEmail()
+  @IsEmail({}, { message: "The email value is not a valid email" })
   @MaxLength(256, { message: "The email value is too long. Maximal length is 256" })
   @IsNotEmpty()
   email: string;
