@@ -9,7 +9,7 @@ const data: Person = {
   details: "admin",
   email: "admin@gmail.com",
   login: "admin",
-  password: bcrypt.hashSync("admin", 2),
+  password: bcrypt.hashSync("admin", process.env.SALT),
 };
 
 async function main() {

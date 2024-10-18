@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../prisma.service";
+import { PrismaService } from "../prisma/prisma.service";
 import { Person, Prisma } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import { ConfigService } from "@nestjs/config";
@@ -23,7 +23,7 @@ export class PeopleService {
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
   ) {}
-  private readonly salt = this.configService.get<number>("SALT");
+  private readonly salt = this.configService.get<number>("SALT", { infer: true });
 
   @PrismaErrorHandler()
   async createPerson(data: Prisma.PersonCreateInput): Promise<Person> {

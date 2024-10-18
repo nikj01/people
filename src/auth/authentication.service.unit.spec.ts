@@ -1,5 +1,5 @@
 import { AuthenticationService, ILoginData } from "./authentication.service";
-import { PrismaService } from "../prisma.service";
+import { PrismaService } from "../prisma/prisma.service";
 import { Test } from "@nestjs/testing";
 import { Person } from "@prisma/client";
 import { BadRequestException } from "@nestjs/common";
