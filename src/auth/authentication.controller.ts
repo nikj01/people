@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from "@nestjs/common";
 import { PeopleService } from "../people/people.service";
-import { AuthenticationService, ILoginData } from "./authentication.service";
+import { AuthenticationService, IAccessToken, ILoginData } from "./authentication.service";
 
 @Controller("auth")
 export class AuthenticationController {
@@ -10,7 +10,7 @@ export class AuthenticationController {
   ) {}
 
   @Post("login")
-  async login(@Body() data: ILoginData): Promise<{ access_token: string }> {
+  async login(@Body() data: ILoginData): Promise<IAccessToken> {
     return await this.authenticationService.login(data);
   }
 }

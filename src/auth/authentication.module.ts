@@ -4,7 +4,7 @@ import { AuthenticationService } from "./authentication.service";
 import { ConfigModule } from "@nestjs/config";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
-import { getJwtModuleConfig } from "src/config/jwt.config";
+import { getJwtModuleConfig } from "../config/jwt.config";
 import { PeopleModule } from "../people/people.module";
 
 @Module({

@@ -8,10 +8,10 @@ import { GetSlimPersonDto } from "./dto/get-slim-person.dto";
 import { plainToInstance } from "class-transformer";
 import { GetPersonDto } from "./dto/get-person.dto";
 import { AuthenticationGuard } from "../guards/authentication.guard";
-import { Public } from "src/decorators/public.decorator";
 import { JwtService } from "@nestjs/jwt";
 import { Roles } from "../decorators/roles.decorator";
 import { RolesGuard } from "../guards/roles.guard";
+import { Public } from "../decorators/public.decorator";
 
 @Controller("people")
 @UseGuards(AuthenticationGuard, RolesGuard)
