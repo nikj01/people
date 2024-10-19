@@ -1,13 +1,15 @@
 import { AuthenticationController } from "./authentication.controller";
 import { Module } from "@nestjs/common";
-import { PeopleService } from "../people/people.service";
 import { AuthenticationService } from "./authentication.service";
-import { PrismaService } from "../prisma.service";
 import { ConfigModule } from "@nestjs/config";
+import { PassportModule } from "@nestjs/passport";
+import { JwtModule } from "@nestjs/jwt";
+import { getJwtModuleConfig } from "../config/jwt.config";
+import { PeopleModule } from "../people/people.module";
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, PassportModule, JwtModule.registerAsync(getJwtModuleConfig()), PeopleModule],
   controllers: [AuthenticationController],
-  providers: [PrismaService, PeopleService, AuthenticationService],
+  providers: [AuthenticationService],
 })
 export class AuthenticationModule {}

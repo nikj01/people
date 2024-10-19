@@ -1,17 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from "@nestjs/common";
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Logger } from "@nestjs/common";
 import { IFindPeopleParams, PeopleService } from "./people.service";
 import { CreatePersonDto } from "./dto/create-person.dto";
 import { UpdatePersonDto } from "./dto/update-person.dto";
-import { GetInfoAboutMe } from "../decorators/get-user.decorator";
-import { Person } from "@prisma/client";
+import { GetJwtToken } from "../decorators/get-jwt-token.decorator";
+import { $Enums, Person } from "@prisma/client";
 import { GetSlimPersonDto } from "./dto/get-slim-person.dto";
 import { plainToInstance } from "class-transformer";
 import { GetPersonDto } from "./dto/get-person.dto";
+import { AuthenticationGuard } from "../guards/authentication.guard";
+import { JwtService } from "@nestjs/jwt";
+import { Roles } from "../decorators/roles.decorator";
+import { RolesGuard } from "../guards/roles.guard";
+import { Public } from "../decorators/public.decorator";
 
 @Controller("people")
+@UseGuards(AuthenticationGuard, RolesGuard)
 export class PeopleController {
-  constructor(private readonly peopleService: PeopleService) {}
+  constructor(
+    private readonly peopleService: PeopleService,
+    private readonly jwtService: JwtService,
+  ) {}
 
+  @Get("/admin")
+  @Roles($Enums.Roles.ADMIN)
+  async adminEndpoint() {
+    return "This is an admin only route";
+  }
+
+  @Public()
   @Post()
   async createPerson(@Body() createPersonDto: CreatePersonDto): Promise<Person> {
     return await this.peopleService.createPerson(createPersonDto);
@@ -26,16 +42,18 @@ export class PeopleController {
       );
   }
 
+  @Get("/me")
+  async aboutMe(@GetJwtToken() token: string): Promise<Person> {
+    const personId = this.jwtService.decode(token).id;
+    return await this.peopleService.findPerson({ id: personId });
+  }
+
   @Get(":id")
   async findPersonBy(@Param("id") id: string): Promise<GetPersonDto> {
+    Logger.log(`ID: ${id}`);
     return await this.peopleService
       .findPerson({ id })
       .then(person => plainToInstance(GetPersonDto, person, { excludeExtraneousValues: true }));
-  }
-
-  @Get("/me")
-  async aboutMe(@GetInfoAboutMe() person: Person): Promise<Person> {
-    return person;
   }
 
   @Patch(":id")
@@ -47,6 +65,7 @@ export class PeopleController {
   }
 
   @Delete("/soft/:id")
+  @Roles($Enums.Roles.ADMIN)
   async softDeletePersonBy(@Param("id") id: string): Promise<Person> {
     return await this.peopleService.softDeletePerson({ id });
   }

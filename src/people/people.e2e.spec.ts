@@ -5,6 +5,7 @@ import * as request from "supertest";
 import * as bcrypt from "bcrypt";
 import { HttpExceptionFilter } from "../filters/http-exception.filter";
 import { ValidationError } from "class-validator";
+import { $Enums, Roles } from "@prisma/client";
 
 describe("People (e2e)", () => {
   let app: INestApplication;
@@ -41,11 +42,15 @@ describe("People (e2e)", () => {
     await app.init();
   });
 
+  afterAll(async () => {
+    await app.close();
+  });
+
   it("should be defined", () => {
     expect(app).toBeDefined();
   });
 
-  let personId: string = "cm254wztg00008zw6ap9bbb3h";
+  let personId: string = "cm2gjmhrs0000twtq6p9cirl2";
   const newPerson = {
     age: 20,
     details: "12345",
@@ -53,6 +58,90 @@ describe("People (e2e)", () => {
     login: "login123",
     password: "password123",
   };
+  let adminJwtToken: string =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNtMmdqbWhzczAwMDF0d3RxNXBkdGJ3MGciLCJyb2xlcyI6WyJBRE1JTiJdLCJpYXQiOjE3MjkzNjYwMzMsImV4cCI6MTcyOTQ1MjQzM30.3c_WtpVW8RzpBY3mnyZlyzRTv0kB487YV9HDRwlQDuQ";
+  let userJwtToken: string = "";
+
+  describe("login", () => {
+    it("should login as admin", () => {
+      return request(app.getHttpServer())
+        .post("/auth/login")
+        .send({ login: "admin", password: "admin" })
+        .expect(201)
+        .expect(({ body }) => {
+          expect(body.access_token).toBeDefined();
+          adminJwtToken = body.access_token;
+          console.log(body);
+        });
+    });
+
+    it("should login as default user", () => {
+      return request(app.getHttpServer())
+        .post("/auth/login")
+        .send({ login: "test123", password: "test123" })
+        .expect(201)
+        .expect(({ body }) => {
+          expect(body.access_token).toBeDefined();
+          userJwtToken = body.access_token;
+          console.log(body);
+        });
+    });
+
+    it("should fail with invalid login", () => {
+      return request(app.getHttpServer())
+        .post("/auth/login")
+        .send({ login: "admin1", password: "admin" })
+        .expect(400)
+        .expect(({ body }) => {
+          console.log(body);
+        });
+    });
+
+    it("should fail with invalid password", () => {
+      return request(app.getHttpServer())
+        .post("/auth/login")
+        .send({ login: "admin", password: "admin1" })
+        .expect(400)
+        .expect(({ body }) => {
+          console.log(body);
+        });
+    });
+  });
+
+  describe("adminEndpoint", () => {
+    it("should return the phrase 'This is an admin only route'", () => {
+      return request(app.getHttpServer())
+        .get("/people/admin")
+        .set("Authorization", `Bearer ${adminJwtToken}`)
+        .send()
+        .expect(200)
+        .expect(({ text }) => {
+          expect(text).toEqual("This is an admin only route");
+          console.log(text);
+        });
+    });
+
+    it("should fail with user token", () => {
+      return request(app.getHttpServer())
+        .get("/people/admin")
+        .set("Authorization", `Bearer ${userJwtToken}`)
+        .send()
+        .expect(403)
+        .expect(({ body }) => {
+          console.log(body);
+        });
+    });
+
+    it("should fail without token", () => {
+      return request(app.getHttpServer())
+        .get("/people/admin")
+        .send()
+        .expect(401)
+        .expect(({ body }) => {
+          console.log(body);
+        });
+    });
+  });
 
   describe("createPerson", () => {
     it("should create a new person", async () => {
@@ -140,23 +229,45 @@ describe("People (e2e)", () => {
   });
 
   describe("findPeople", () => {
+    it("should fail without token", () => {
+      return request(app.getHttpServer())
+        .get("/people")
+        .send()
+        .expect(401)
+        .expect(({ body }) => {
+          console.log(body);
+        });
+    });
+
     it("should return the list of people", () => {
       return request(app.getHttpServer())
         .get("/people")
+        .set("Authorization", `Bearer ${adminJwtToken}`)
         .send()
         .expect(200)
         .expect(({ body }) => {
           expect(body).toBeInstanceOf(Array);
-          expect(body.length).toBeGreaterThanOrEqual(2);
+          expect(body.length).toBeGreaterThanOrEqual(3);
           console.log(body);
         });
     });
   });
 
   describe("findPersonBy", () => {
+    it("should fail without token", () => {
+      return request(app.getHttpServer())
+        .get(`/people/${personId}`)
+        .send()
+        .expect(401)
+        .expect(({ body }) => {
+          console.log(body);
+        });
+    });
+
     it("should return a person with a certain id", () => {
       return request(app.getHttpServer())
         .get(`/people/${personId}`)
+        .set("Authorization", `Bearer ${adminJwtToken}`)
         .send()
         .expect(200)
         .expect(({ body }) => {
@@ -169,6 +280,7 @@ describe("People (e2e)", () => {
     it("should fail with invalid id", () => {
       return request(app.getHttpServer())
         .get(`/people/${personId}1`)
+        .set("Authorization", `Bearer ${adminJwtToken}`)
         .send()
         .expect(400)
         .expect(({ body }) => {
@@ -177,9 +289,40 @@ describe("People (e2e)", () => {
     });
   });
 
-  // describe("aboutMe", () => {
-  //   it("", () => {});
-  // });
+  describe("aboutMe", () => {
+    const admin = {
+      age: 20,
+      details: "admin",
+      email: "admin@gmail.com",
+      login: "admin",
+      roles: [Roles.ADMIN],
+    };
+
+    it("should fail without token", () => {
+      return request(app.getHttpServer())
+        .get("/people/me")
+        .send()
+        .expect(401)
+        .expect(({ body }) => {
+          console.log(body);
+        });
+    });
+
+    it("should return a person with a certain token", () => {
+      return request(app.getHttpServer())
+        .get("/people/me")
+        .set("Authorization", `Bearer ${adminJwtToken}`)
+        .send()
+        .expect(200)
+        .expect(({ body }) => {
+          console.log(body);
+          expect(body.age).toEqual(admin.age);
+          expect(body.details).toEqual(admin.details);
+          expect(body.email).toEqual(admin.email);
+          expect(body.login).toEqual(admin.login);
+        });
+    });
+  });
 
   const updatedPerson = {
     age: 50,
@@ -187,12 +330,24 @@ describe("People (e2e)", () => {
     email: "email50@gmail.com",
     login: "login50",
     password: "password50",
+    roles: [$Enums.Roles.ADMIN],
   };
 
   describe("updatePersonBy", () => {
+    it("should fail without token", () => {
+      return request(app.getHttpServer())
+        .patch(`/people/${personId}`)
+        .send(updatedPerson)
+        .expect(401)
+        .expect(({ body }) => {
+          console.log(body);
+        });
+    });
+
     it("should update person", () => {
       return request(app.getHttpServer())
         .patch(`/people/${personId}`)
+        .set("Authorization", `Bearer ${adminJwtToken}`)
         .send(updatedPerson)
         .expect(200)
         .expect(({ body }) => {
@@ -216,6 +371,7 @@ describe("People (e2e)", () => {
 
       return request(app.getHttpServer())
         .patch(`/people/${personId}`)
+        .set("Authorization", `Bearer ${adminJwtToken}`)
         .send(newPersonWithInvalidData)
         .expect(400)
         .expect(({ body }) => {
@@ -238,43 +394,77 @@ describe("People (e2e)", () => {
 
       return request(app.getHttpServer())
         .patch(`/people/${personId}`)
+        .set("Authorization", `Bearer ${adminJwtToken}`)
         .send(newPersonWithInvalidData)
         .expect(400)
         .expect(({ body }) => {
           console.log(body);
         });
     });
+  });
 
-    describe("softDeletePersonBy", () => {
-      it("should soft delete person", () => {
-        return request(app.getHttpServer())
-          .delete(`/people/soft/${personId}`)
-          .send()
-          .expect(200)
-          .expect(({ body }) => {
-            expect(body.isDeleted).toEqual(true);
-            expect(body.deletedAt).toBeDefined();
-            console.log(body);
-          });
-      });
+  describe("softDeletePersonBy", () => {
+    it("should fail without token", () => {
+      return request(app.getHttpServer())
+        .delete(`/people/soft/${personId}`)
+        .send()
+        .expect(401)
+        .expect(({ body }) => {
+          console.log(body);
+        });
     });
 
-    describe("deletePersonBy", () => {
-      it("should delete person", () => {
-        return request(app.getHttpServer())
-          .delete(`/people/${personId}`)
-          .send()
-          .expect(200)
-          .expect(({ body }) => {
-            expect(body.id).toEqual(personId);
-            expect(body.age).toEqual(updatedPerson.age);
-            expect(body.details).toEqual(updatedPerson.details);
-            expect(body.email).toEqual(updatedPerson.email);
-            expect(body.login).toEqual(updatedPerson.login);
-            expect(bcrypt.compareSync(updatedPerson.password, body.password)).toBe(true);
-            console.log(body);
-          });
-      });
+    it("should fail with user token", () => {
+      return request(app.getHttpServer())
+        .delete(`/people/soft/${personId}`)
+        .set("Authorization", `Bearer ${userJwtToken}`)
+        .send()
+        .expect(403)
+        .expect(({ body }) => {
+          console.log(body);
+        });
+    });
+
+    it("should soft delete person", () => {
+      return request(app.getHttpServer())
+        .delete(`/people/soft/${personId}`)
+        .set("Authorization", `Bearer ${adminJwtToken}`)
+        .send()
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.isDeleted).toEqual(true);
+          expect(body.deletedAt).toBeDefined();
+          console.log(body);
+        });
+    });
+  });
+
+  describe("deletePersonBy", () => {
+    it("should fail without token", () => {
+      return request(app.getHttpServer())
+        .delete(`/people/${personId}`)
+        .send()
+        .expect(401)
+        .expect(({ body }) => {
+          console.log(body);
+        });
+    });
+
+    it("should delete person", () => {
+      return request(app.getHttpServer())
+        .delete(`/people/${personId}`)
+        .set("Authorization", `Bearer ${adminJwtToken}`)
+        .send()
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.id).toEqual(personId);
+          expect(body.age).toEqual(updatedPerson.age);
+          expect(body.details).toEqual(updatedPerson.details);
+          expect(body.email).toEqual(updatedPerson.email);
+          expect(body.login).toEqual(updatedPerson.login);
+          expect(bcrypt.compareSync(updatedPerson.password, body.password)).toBe(true);
+          console.log(body);
+        });
     });
   });
 });

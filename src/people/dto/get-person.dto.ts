@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, Roles } from "@prisma/client";
 import { Expose } from "class-transformer";
 
 export class GetPersonDto
@@ -13,4 +13,6 @@ export class GetPersonDto
   details: string;
   @Expose()
   createdAt: Date;
+  @Expose()
+  roles: Roles[];
 }

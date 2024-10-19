@@ -1,5 +1,6 @@
 import { IsEmail, IsNotEmpty, IsNumber, IsString, Max, MaxLength, Min, MinLength } from "class-validator";
 import { CreatePersonDto } from "./create-person.dto";
+import { Roles } from "@prisma/client";
 
 export class UpdatePersonDto implements Partial<CreatePersonDto> {
   @IsString()
@@ -31,4 +32,7 @@ export class UpdatePersonDto implements Partial<CreatePersonDto> {
   @MaxLength(1000, { message: "The details value is too long. Maximal length is 1000" })
   @IsNotEmpty()
   details: string;
+
+  @IsNotEmpty({ message: "The roles value is required" })
+  roles: Roles[];
 }

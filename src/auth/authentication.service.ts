@@ -1,25 +1,37 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { PrismaService } from "../prisma.service";
 import { Person } from "@prisma/client";
 import * as bcrypt from "bcrypt";
+import { JwtService } from "@nestjs/jwt";
+import { PeopleService } from "../people/people.service";
 
 export interface ILoginData {
   login: string;
   password: string;
 }
+export interface IAccessToken {
+  access_token: string;
+}
 
 @Injectable()
 export class AuthenticationService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly peopleService: PeopleService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  async login(data: ILoginData): Promise<Person> {
-    const person = await this.prismaService.person.findUniqueOrThrow({
-      where: {
-        login: data.login,
-      },
+  async login(data: ILoginData): Promise<IAccessToken> {
+    const person: Person = await this.validatePerson(data);
+    const payload = { id: person.id, roles: person.roles };
+    return { access_token: await this.jwtService.signAsync(payload) };
+  }
+
+  async validatePerson(data: ILoginData): Promise<Person> {
+    const person: Person = await this.peopleService.findPerson({
+      login: data.login,
     });
+    const isMatch: boolean = await bcrypt.compare(data.password, person.password);
 
-    if (await bcrypt.compare(data.password, person.password)) {
+    if (isMatch) {
       return person;
     } else {
       throw new BadRequestException("Invalid password");
