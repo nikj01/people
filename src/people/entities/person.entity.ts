@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, Roles } from "@prisma/client";
 import { Expose } from "class-transformer";
 
 export class Person implements Prisma.PersonCreateInput {
@@ -16,6 +16,8 @@ export class Person implements Prisma.PersonCreateInput {
   details: string;
   @Expose()
   isDeleted?: boolean;
+  @Expose()
+  roles: Roles[];
   @Expose()
   createdAt?: string | Date;
   @Expose()

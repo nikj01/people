@@ -1,15 +1,17 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Roles } from "@prisma/client";
 import { Person } from "../src/people/entities/person.entity";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
+const SALT: number = +process.env.SALT;
 
 const data: Person = {
   age: 20,
   details: "admin",
   email: "admin@gmail.com",
   login: "admin",
-  password: bcrypt.hashSync("admin", process.env.SALT),
+  password: bcrypt.hashSync("admin", SALT),
+  roles: [Roles.ADMIN],
 };
 
 async function main() {

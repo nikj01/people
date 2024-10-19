@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { Person } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
@@ -21,7 +21,7 @@ export class AuthenticationService {
 
   async login(data: ILoginData): Promise<IAccessToken> {
     const person: Person = await this.validatePerson(data);
-    const payload = { login: person.login, id: person.id };
+    const payload = { id: person.id, roles: person.roles };
     return { access_token: await this.jwtService.signAsync(payload) };
   }
 
@@ -32,7 +32,6 @@ export class AuthenticationService {
     const isMatch: boolean = await bcrypt.compare(data.password, person.password);
 
     if (isMatch) {
-      Logger.log(`User ${person.login} validated`);
       return person;
     } else {
       throw new BadRequestException("Invalid password");

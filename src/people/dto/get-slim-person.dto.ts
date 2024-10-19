@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, Roles } from "@prisma/client";
 import { Expose } from "class-transformer";
 
 export class GetSlimPersonDto
@@ -14,4 +14,6 @@ export class GetSlimPersonDto
   age: number;
   @Expose()
   createdAt: Date;
+  @Expose()
+  roles: Roles[];
 }

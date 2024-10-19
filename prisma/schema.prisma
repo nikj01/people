@@ -7,14 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Roles {
+  ADMIN
+  USER
+}
+
 model Person {
   id        String  @id @default(cuid())
-  login     String  @db.VarChar(256) @unique
-  email     String  @db.VarChar(256) @unique
+  login     String  @unique @db.VarChar(256)
+  email     String  @unique @db.VarChar(256)
   password  String  @db.VarChar(256)
   age       Int
   details   String  @db.VarChar(1000)
   isDeleted Boolean @default(false)
+  roles     Roles[] @default([USER])
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

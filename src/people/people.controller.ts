@@ -3,30 +3,37 @@ import { IFindPeopleParams, PeopleService } from "./people.service";
 import { CreatePersonDto } from "./dto/create-person.dto";
 import { UpdatePersonDto } from "./dto/update-person.dto";
 import { GetJwtToken } from "../decorators/get-jwt-token.decorator";
-import { Person } from "@prisma/client";
+import { $Enums, Person } from "@prisma/client";
 import { GetSlimPersonDto } from "./dto/get-slim-person.dto";
 import { plainToInstance } from "class-transformer";
 import { GetPersonDto } from "./dto/get-person.dto";
-import { AuthenticationGuard } from "../auth/authentication.guard";
+import { AuthenticationGuard } from "../guards/authentication.guard";
 import { Public } from "src/decorators/public.decorator";
 import { JwtService } from "@nestjs/jwt";
+import { Roles } from "../decorators/roles.decorator";
+import { RolesGuard } from "../guards/roles.guard";
 
 @Controller("people")
-@UseGuards(AuthenticationGuard)
+@UseGuards(AuthenticationGuard, RolesGuard)
 export class PeopleController {
   constructor(
     private readonly peopleService: PeopleService,
     private readonly jwtService: JwtService,
   ) {}
 
-  @Post()
+  @Get("/admin")
+  @Roles($Enums.Roles.ADMIN)
+  async adminEndpoint() {
+    return "This is an admin only route";
+  }
+
   @Public()
+  @Post()
   async createPerson(@Body() createPersonDto: CreatePersonDto): Promise<Person> {
     return await this.peopleService.createPerson(createPersonDto);
   }
 
   @Get()
-  // @UseGuards(AuthenticationGuard)
   async findPeople(@Param() params: IFindPeopleParams): Promise<GetSlimPersonDto[]> {
     return await this.peopleService
       .findPeople(params)
@@ -58,6 +65,7 @@ export class PeopleController {
   }
 
   @Delete("/soft/:id")
+  @Roles($Enums.Roles.ADMIN)
   async softDeletePersonBy(@Param("id") id: string): Promise<Person> {
     return await this.peopleService.softDeletePerson({ id });
   }
