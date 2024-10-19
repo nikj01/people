@@ -15,7 +15,6 @@ export class AuthenticationGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
     const secret = this.configService.get<string>("JWT_SECRET", { infer: true });
     Logger.log(`Token: ${token}`);
-    Logger.log(`Secret: ${secret}`);
 
     if (!token) {
       Logger.log("No token provided");

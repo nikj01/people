@@ -32,7 +32,7 @@ export class AuthenticationService {
     const isMatch: boolean = await bcrypt.compare(data.password, person.password);
 
     if (isMatch) {
-      Logger.log(`User ${person.login} logged in`);
+      Logger.log(`User ${person.login} validated`);
       return person;
     } else {
       throw new BadRequestException("Invalid password");
