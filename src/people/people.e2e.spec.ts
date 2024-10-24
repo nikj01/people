@@ -31,7 +31,6 @@ describe("People (e2e)", () => {
 
       // new ValidationPipe({
       //   exceptionFactory: (validationErrors: ValidationError[] = []) => {
-      //     console.error(JSON.stringify(validationErrors));
       //     return new BadRequestException(validationErrors);
       //   },
       //   transform: true,
@@ -71,7 +70,6 @@ describe("People (e2e)", () => {
         .expect(({ body }) => {
           expect(body.access_token).toBeDefined();
           adminJwtToken = body.access_token;
-          console.log(body);
         });
     });
 
@@ -83,7 +81,6 @@ describe("People (e2e)", () => {
         .expect(({ body }) => {
           expect(body.access_token).toBeDefined();
           userJwtToken = body.access_token;
-          console.log(body);
         });
     });
 
@@ -92,9 +89,7 @@ describe("People (e2e)", () => {
         .post("/auth/login")
         .send({ login: "admin1", password: "admin" })
         .expect(400)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should fail with invalid password", () => {
@@ -102,9 +97,7 @@ describe("People (e2e)", () => {
         .post("/auth/login")
         .send({ login: "admin", password: "admin1" })
         .expect(400)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
   });
 
@@ -117,7 +110,6 @@ describe("People (e2e)", () => {
         .expect(200)
         .expect(({ text }) => {
           expect(text).toEqual("This is an admin only route");
-          console.log(text);
         });
     });
 
@@ -127,9 +119,7 @@ describe("People (e2e)", () => {
         .set("Authorization", `Bearer ${userJwtToken}`)
         .send()
         .expect(403)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should fail without token", () => {
@@ -137,9 +127,7 @@ describe("People (e2e)", () => {
         .get("/people/admin")
         .send()
         .expect(401)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
   });
 
@@ -156,8 +144,6 @@ describe("People (e2e)", () => {
           expect(body.login).toEqual(newPerson.login);
           expect(bcrypt.compareSync(newPerson.password, body.password)).toBe(true);
           personId = body.id;
-          console.log(body);
-          console.log(personId);
         });
     });
 
@@ -169,9 +155,7 @@ describe("People (e2e)", () => {
         .post("/people")
         .send(newPersonWithInvalidEmail)
         .expect(400)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should fail if a person with a certain login already exists", async () => {
@@ -182,9 +166,7 @@ describe("People (e2e)", () => {
         .post("/people")
         .send(newPerson)
         .expect(400)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should fail because fields values are too small and short", async () => {
@@ -200,9 +182,7 @@ describe("People (e2e)", () => {
         .post("/people")
         .send(newPersonWithInvalidData)
         .expect(400)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should fail because fields values are too big and long", async () => {
@@ -222,9 +202,7 @@ describe("People (e2e)", () => {
         .post("/people")
         .send(newPersonWithInvalidData)
         .expect(400)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
   });
 
@@ -234,9 +212,7 @@ describe("People (e2e)", () => {
         .get("/people")
         .send()
         .expect(401)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should return the list of people", () => {
@@ -248,7 +224,6 @@ describe("People (e2e)", () => {
         .expect(({ body }) => {
           expect(body).toBeInstanceOf(Array);
           expect(body.length).toBeGreaterThanOrEqual(3);
-          console.log(body);
         });
     });
   });
@@ -259,9 +234,7 @@ describe("People (e2e)", () => {
         .get(`/people/${personId}`)
         .send()
         .expect(401)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should return a person with a certain id", () => {
@@ -271,7 +244,6 @@ describe("People (e2e)", () => {
         .send()
         .expect(200)
         .expect(({ body }) => {
-          console.log(body);
           expect(body.age).toEqual(newPerson.age);
           expect(body.details).toEqual(newPerson.details);
           expect(body.email).toEqual(newPerson.email);
@@ -283,9 +255,7 @@ describe("People (e2e)", () => {
         .set("Authorization", `Bearer ${adminJwtToken}`)
         .send()
         .expect(400)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
   });
 
@@ -303,9 +273,7 @@ describe("People (e2e)", () => {
         .get("/people/me")
         .send()
         .expect(401)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should return a person with a certain token", () => {
@@ -315,7 +283,6 @@ describe("People (e2e)", () => {
         .send()
         .expect(200)
         .expect(({ body }) => {
-          console.log(body);
           expect(body.age).toEqual(admin.age);
           expect(body.details).toEqual(admin.details);
           expect(body.email).toEqual(admin.email);
@@ -339,9 +306,7 @@ describe("People (e2e)", () => {
         .patch(`/people/${personId}`)
         .send(updatedPerson)
         .expect(401)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should update person", () => {
@@ -356,7 +321,6 @@ describe("People (e2e)", () => {
           expect(body.email).toEqual(updatedPerson.email);
           expect(body.login).toEqual(updatedPerson.login);
           expect(bcrypt.compareSync(updatedPerson.password, body.password)).toBe(true);
-          console.log(body);
         });
     });
 
@@ -374,9 +338,7 @@ describe("People (e2e)", () => {
         .set("Authorization", `Bearer ${adminJwtToken}`)
         .send(newPersonWithInvalidData)
         .expect(400)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should fail because fields values are too big and long", async () => {
@@ -397,9 +359,7 @@ describe("People (e2e)", () => {
         .set("Authorization", `Bearer ${adminJwtToken}`)
         .send(newPersonWithInvalidData)
         .expect(400)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
   });
 
@@ -409,9 +369,7 @@ describe("People (e2e)", () => {
         .delete(`/people/soft/${personId}`)
         .send()
         .expect(401)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should fail with user token", () => {
@@ -420,9 +378,7 @@ describe("People (e2e)", () => {
         .set("Authorization", `Bearer ${userJwtToken}`)
         .send()
         .expect(403)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should soft delete person", () => {
@@ -434,7 +390,6 @@ describe("People (e2e)", () => {
         .expect(({ body }) => {
           expect(body.isDeleted).toEqual(true);
           expect(body.deletedAt).toBeDefined();
-          console.log(body);
         });
     });
   });
@@ -445,9 +400,7 @@ describe("People (e2e)", () => {
         .delete(`/people/${personId}`)
         .send()
         .expect(401)
-        .expect(({ body }) => {
-          console.log(body);
-        });
+        .expect(() => {});
     });
 
     it("should delete person", () => {
@@ -463,7 +416,6 @@ describe("People (e2e)", () => {
           expect(body.email).toEqual(updatedPerson.email);
           expect(body.login).toEqual(updatedPerson.login);
           expect(bcrypt.compareSync(updatedPerson.password, body.password)).toBe(true);
-          console.log(body);
         });
     });
   });
